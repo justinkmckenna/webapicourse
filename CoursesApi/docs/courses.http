@@ -1,0 +1,2 @@
+GET http://localhost:1338/courses HTTP/1.1
+Accept: application/json
