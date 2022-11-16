@@ -1,5 +1,5 @@
-using CoursesApi;
 using System.Text.Json.Serialization;
+using WebApiShared.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,9 +15,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<CourseCatalog>();
+builder.Services.AddTransient<IProvideOfferings, OfferingsCatalogApiCall>();
 
 // Adapters
 builder.Services.AddDbContext<CoursesDataContext>(config => { config.UseSqlServer(builder.Configuration.GetConnectionString("courses-db")); });
+
+// typed http client, can add config/proxy settings, etc.
+builder.Services.AddHttpClient<OfferingsApiAdapter>(config => 
+{ 
+    config.BaseAddress = new Uri(builder.Configuration.GetValue<string>("offerings-api"));
+    config.DefaultRequestHeaders.Add("User-Agent", "offerings-api");
+});
 
 var app = builder.Build();
 

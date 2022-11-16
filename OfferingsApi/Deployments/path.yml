@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: offerings-api-ingress
+  labels:
+    name: offerings-api-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - host: my-real-app.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/courses/(.*)/offerings"
+        backend:
+          service:
+            name: offerings-api-service
+            port: 
+              number: 80

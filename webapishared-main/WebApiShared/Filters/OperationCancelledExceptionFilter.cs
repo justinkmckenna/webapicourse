@@ -1,4 +1,7 @@
-﻿namespace CoursesApi;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApiShared.Filters;
 
 public class OperationCancelledExceptionFilterAttribute : ExceptionFilterAttribute
 {

@@ -1,4 +1,14 @@
-﻿namespace CoursesApi.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CoursesApi.Models;
+
+public record CourseCreateRequest
+{
+    [Required, MaxLength(100)]
+    public string Title { get; init; } = string.Empty;
+    [Required, MaxLength(500)]
+    public string Description { get; init; } = string.Empty;
+}
 
 public record CoursesResponseModel
 {

@@ -1,17 +1,19 @@
-﻿namespace CoursesApi.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace CoursesApi.Domain;
 
 public class CourseCatalog
 {
-    private readonly CoursesDataContext _context;
+    private readonly CoursesDataContext _coursesDataContext;
 
-    public CourseCatalog(CoursesDataContext context)
+    public CourseCatalog(CoursesDataContext coursesDataContext)
     {
-        _context = context;
+        _coursesDataContext = coursesDataContext;
     }
 
     public async Task<CoursesResponseModel> GetFullCatalogAsync(CancellationToken token)
     {
-        var courses = await _context.Courses.Where(c => c.Retired == false).Select(c => new CourseItemResponse {
+        var courses = await _coursesDataContext.Courses.Where(c => c.Retired == false).Select(c => new CourseItemResponse {
             Id = c.Id.ToString(),
             Title = c.Title,
             Category = c.Category
@@ -25,7 +27,7 @@ public class CourseCatalog
 
     public async Task<CourseItemDetailsResponse?> GetCourseByIdAsync(int id, CancellationToken token)
     {
-        var response = await _context.Courses.Where(c => c.Id == id && c.Retired == false)
+        var response = await _coursesDataContext.Courses.Where(c => c.Id == id && c.Retired == false)
             .Select(c => new CourseItemDetailsResponse
             {
                 Id = c.Id.ToString(),
@@ -35,5 +37,39 @@ public class CourseCatalog
             }).SingleOrDefaultAsync(token);
 
         return response;
+    }
+
+    public async Task<CourseItemDetailsResponse> AddCourseAsync(CourseCreateRequest request, CategoryType category)
+    {
+        var courseToAdd = new CourseEntity
+        {
+            Title = request.Title,
+            Description = request.Description,
+            Retired = false,
+            Category = category
+        };
+        _coursesDataContext.Courses.Add(courseToAdd);
+        await _coursesDataContext.SaveChangesAsync();
+
+        var response = new CourseItemDetailsResponse
+        {
+            Id = courseToAdd.Id.ToString(),
+            Title = courseToAdd.Title,
+            Description = courseToAdd.Description,
+            Category = courseToAdd.Category
+        };
+        return response;
+    }
+
+    public async Task<bool> UpdateDescriptionAsync(int id, string description)
+    {
+        var course = await _coursesDataContext.Courses.SingleOrDefaultAsync(c => c.Id == id && c.Retired == false);
+        if (course != null)
+        {
+            course.Description = description;
+            await _coursesDataContext.SaveChangesAsync();
+            return true;
+        }
+        return false;
     }
 }
